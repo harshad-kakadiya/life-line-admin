@@ -18,7 +18,6 @@ import {
     TextField,
     Box,
     CircularProgress,
-    Link as MuiLink,
     Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -34,7 +33,7 @@ export default function PressReleasePage() {
     const [editingPressRelease, setEditingPressRelease] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
-        link: '',
+        publishDate: '',
         image: null,
         imageUrl: '',
     });
@@ -60,7 +59,7 @@ export default function PressReleasePage() {
         setEditingPressRelease(null);
         setFormData({
             title: '',
-            link: '',
+            publishDate: '',
             image: null,
             imageUrl: '',
         });
@@ -71,7 +70,9 @@ export default function PressReleasePage() {
         setEditingPressRelease(pressRelease);
         setFormData({
             title: pressRelease.title || '',
-            link: pressRelease.link || '',
+            publishDate: pressRelease.publishDate
+                ? new Date(pressRelease.publishDate).toISOString().slice(0, 10)
+                : '',
             image: null,
             imageUrl: pressRelease.imageUrl || '',
         });
@@ -83,7 +84,7 @@ export default function PressReleasePage() {
         setEditingPressRelease(null);
         setFormData({
             title: '',
-            link: '',
+            publishDate: '',
             image: null,
             imageUrl: '',
         });
@@ -113,15 +114,8 @@ export default function PressReleasePage() {
     };
 
     const handleSubmit = async () => {
-        if (!formData.title || !formData.link || (!formData.image && !editingPressRelease)) {
+        if (!formData.title || !formData.publishDate || (!formData.image && !editingPressRelease)) {
             alert('Please fill in all required fields and select an image');
-            return;
-        }
-
-        try {
-            new URL(formData.link);
-        } catch (e) {
-            alert('Please enter a valid URL');
             return;
         }
 
@@ -264,29 +258,15 @@ export default function PressReleasePage() {
                                         />
                                     </Box>
                                     <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                                        <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 2, color: '#1e293b' }}>
+                                        <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 1, color: '#1e293b' }}>
                                             {pressRelease.title}
                                         </Typography>
-                                        <MuiLink
-                                            href={pressRelease.link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 0.5,
-                                                color: '#4facfe',
-                                                textDecoration: 'none',
-                                                fontSize: '0.875rem',
-                                                fontWeight: 500,
-                                                '&:hover': {
-                                                    textDecoration: 'underline',
-                                                },
-                                            }}
-                                        >
-                                            View Article
-                                            <OpenInNewIcon fontSize="small" />
-                                        </MuiLink>
+                                        <Typography variant="body2" sx={{ color: '#475569', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <OpenInNewIcon fontSize="small" sx={{ color: '#4facfe' }} />
+                                            {pressRelease.publishDate
+                                                ? new Date(pressRelease.publishDate).toLocaleDateString()
+                                                : 'No date provided'}
+                                        </Typography>
                                     </CardContent>
                                     <CardActions sx={{ p: 2, pt: 0, justifyContent: 'space-between' }}>
                                         <Box>
@@ -370,15 +350,15 @@ export default function PressReleasePage() {
                                 }}
                             />
                             <TextField
-                                label="Link"
-                                name="link"
-                                value={formData.link}
+                                label="Publish Date"
+                                name="publishDate"
+                                type="date"
+                                value={formData.publishDate}
                                 onChange={handleInputChange}
                                 fullWidth
                                 required
-                                variant="outlined"
-                                placeholder="https://example.com"
-                                helperText="Enter a valid URL"
+                                InputLabelProps={{ shrink: true }}
+                                helperText="Select the date this press release is published"
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: '12px',

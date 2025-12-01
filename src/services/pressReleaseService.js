@@ -40,7 +40,7 @@ export const pressReleaseService = {
         const newPressRelease = {
             id: nextId++,
             title: pressReleaseData.title,
-            link: pressReleaseData.link,
+            publishDate: pressReleaseData.publishDate,
             imageUrl: pressReleaseData.imageUrl,
             createdAt: new Date().toISOString(),
         };
@@ -69,7 +69,7 @@ export const pressReleaseService = {
             mockPressReleases[index] = {
                 ...mockPressReleases[index],
                 title: pressReleaseData.title,
-                link: pressReleaseData.link,
+                publishDate: pressReleaseData.publishDate,
                 imageUrl: pressReleaseData.imageUrl || mockPressReleases[index].imageUrl,
                 updatedAt: new Date().toISOString(),
             };

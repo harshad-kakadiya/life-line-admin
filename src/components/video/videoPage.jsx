@@ -37,7 +37,6 @@ export default function VideoPage() {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        video: null,
         videoUrl: '',
     });
     const [loading, setLoading] = useState(false);
@@ -63,7 +62,6 @@ export default function VideoPage() {
         setFormData({
             title: '',
             description: '',
-            video: null,
             videoUrl: '',
         });
         setOpenDialog(true);
@@ -75,7 +73,6 @@ export default function VideoPage() {
         setFormData({
             title: video.title || '',
             description: video.description || '',
-            video: null,
             videoUrl: video.videoUrl || '',
         });
         setOpenDialog(true);
@@ -97,7 +94,6 @@ export default function VideoPage() {
         setFormData({
             title: '',
             description: '',
-            video: null,
             videoUrl: '',
         });
     };
@@ -110,20 +106,9 @@ export default function VideoPage() {
         }));
     };
 
-    const handleVideoFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setFormData((prev) => ({
-                ...prev,
-                video: file,
-                videoUrl: URL.createObjectURL(file),
-            }));
-        }
-    };
-
     const handleSubmit = async () => {
-        if (!formData.title || !formData.description) {
-            alert('Please fill in all required fields');
+        if (!formData.title || !formData.description || !formData.videoUrl) {
+            alert('Please fill in all required fields, including the video link');
             return;
         }
 
@@ -536,51 +521,39 @@ export default function VideoPage() {
                                     },
                                 }}
                             />
-                            <Box>
-                                <Typography variant="body2" sx={{ mb: 2, fontWeight: 600, color: '#475569', fontSize: '1rem' }}>
-                                    Video File
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        border: '2px dashed #cbd5e1',
-                                        borderRadius: '16px',
-                                        p: 4,
-                                        textAlign: 'center',
-                                        transition: 'all 0.3s ease',
-                                        background: '#f8fafc',
-                                        '&:hover': {
-                                            borderColor: '#667eea',
-                                            backgroundColor: 'rgba(102, 126, 234, 0.05)',
-                                        },
-                                    }}
-                                >
-                                    <input
-                                        type="file"
-                                        accept="video/*"
-                                        onChange={handleVideoFileChange}
+                            <TextField
+                                label="Video Link"
+                                name="videoUrl"
+                                value={formData.videoUrl}
+                                onChange={handleInputChange}
+                                fullWidth
+                                required
+                                variant="outlined"
+                                placeholder="https://example.com/video.mp4"
+                                helperText="Paste a direct video URL or streaming link"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '12px',
+                                    },
+                                }}
+                            />
+                            {formData.videoUrl && (
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#475569' }}>
+                                        Preview
+                                    </Typography>
+                                    <video
+                                        src={formData.videoUrl}
+                                        width="100%"
+                                        height="250"
+                                        controls
                                         style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '12px',
-                                            cursor: 'pointer',
+                                            borderRadius: '16px',
+                                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                                         }}
                                     />
                                 </Box>
-                                {formData.videoUrl && (
-                                    <Box sx={{ mt: 3 }}>
-                                        <video
-                                            src={formData.videoUrl}
-                                            width="100%"
-                                            height="250"
-                                            controls
-                                            style={{
-                                                borderRadius: '16px',
-                                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                                            }}
-                                        />
-                                    </Box>
-                                )}
-                            </Box>
+                            )}
                         </Box>
                     </DialogContent>
                     <DialogActions sx={{ p: 4, pt: 2 }}>
