@@ -42,7 +42,12 @@ export default function GalleryPage() {
         setLoading(true);
         try {
             const data = await galleryService.getAll();
-            setPhotos(data);
+            const normalized = (data || []).map((item, index) => ({
+                ...item,
+                id: item.id ?? item._id ?? index,
+                photoUrl: item.photoUrl ?? item.image ?? item.imageUrl ?? '',
+            }));
+            setPhotos(normalized);
         } catch (error) {
             console.error('Error loading photos:', error);
         } finally {
@@ -80,6 +85,7 @@ export default function GalleryPage() {
     const handlePhotoFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            console.log(flie)
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData((prev) => ({

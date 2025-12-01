@@ -22,6 +22,7 @@ import {
     Paper,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import CloseIcon from '@mui/icons-material/Close';
@@ -129,6 +130,23 @@ export default function VideoPage() {
         }
     };
 
+    const handleDelete = async (id, e) => {
+        e?.stopPropagation();
+        if (!window.confirm('Are you sure you want to delete this video?')) {
+            return;
+        }
+        setLoading(true);
+        try {
+            await videoService.delete(id);
+            await loadVideos();
+        } catch (error) {
+            console.error('Error deleting video:', error);
+            alert('Error deleting video. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <Box sx={{ minHeight: 'calc(100vh - 64px)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', py: 4 }}>
             <Container maxWidth="xl">
@@ -222,7 +240,7 @@ export default function VideoPage() {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {videos.map((video, index) => (
                             <Card
-                                key={video.id}
+                                key={video.id ?? video._id ?? index}
                                 onClick={() => handleOpenVideoModal(video)}
                                 sx={{
                                     display: 'flex',
@@ -380,20 +398,36 @@ export default function VideoPage() {
                                                 Click to play
                                             </Typography>
                                         </Box>
-                                        <IconButton
-                                            onClick={(e) => handleOpenEditDialog(video, e)}
-                                            sx={{
-                                                color: '#667eea',
-                                                background: 'rgba(102, 126, 234, 0.1)',
-                                                '&:hover': {
-                                                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
-                                                    transform: 'scale(1.1)',
-                                                },
-                                                transition: 'all 0.2s ease',
-                                            }}
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <IconButton
+                                                onClick={(e) => handleOpenEditDialog(video, e)}
+                                                sx={{
+                                                    color: '#667eea',
+                                                    background: 'rgba(102, 126, 234, 0.1)',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                                                        transform: 'scale(1.1)',
+                                                    },
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                            >
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={(e) => handleDelete(video.id ?? video._id, e)}
+                                                sx={{
+                                                    color: '#ef4444',
+                                                    background: 'rgba(248, 113, 113, 0.1)',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                                                        transform: 'scale(1.05)',
+                                                    },
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Box>
                                     </Box>
                                 </Box>
                             </Card>

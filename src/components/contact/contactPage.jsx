@@ -83,12 +83,36 @@ export default function ContactPage() {
         setFormError('');
     };
 
+    const handleOpenDialog = () => {
+        setFormData(initialFormState);
+        setFormError('');
+        setDialogOpen(true);
+    };
+
     const validateForm = () => {
         if (!formData.name || !formData.email || !formData.phone || !formData.gender || !formData.message) {
             setFormError('All fields are required.');
             return false;
         }
         return true;
+    };
+
+    const handleSubmit = async () => {
+        if (!validateForm()) {
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await contactService.create(formData);
+            setFeedback({ type: 'success', message: 'Contact entry added successfully.' });
+            handleDialogClose();
+            await loadContacts();
+        } catch (error) {
+            setFormError(error.message || 'Failed to save contact. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleDelete = async (id) => {
@@ -250,6 +274,24 @@ export default function ContactPage() {
                                 </IconButton>
                             </span>
                         </Tooltip>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={handleOpenDialog}
+                            sx={{
+                                textTransform: 'none',
+                                px: 3,
+                                py: 1.5,
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                boxShadow: '0 6px 20px rgba(99, 102, 241, 0.35)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                                },
+                            }}
+                        >
+                            Add Contact
+                        </Button>
                     </Box>
                 </Box>
 
@@ -277,7 +319,117 @@ export default function ContactPage() {
                     {renderTableContent()}
                 </Paper>
             </Container>
+            <Dialog
+                open={dialogOpen}
+                onClose={handleDialogClose}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: '20px',
+                    },
+                }}
+            >
+                <DialogTitle
+                    sx={{
+                        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        color: '#ffffff',
+                        fontWeight: 600,
+                        py: 2.5,
+                    }}
+                >
+                    Add Contact Entry
+                </DialogTitle>
+                <DialogContent sx={{ p: 3 }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                label="Name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleFieldChange}
+                                fullWidth
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                label="Email"
+                                name="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={handleFieldChange}
+                                fullWidth
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                label="Phone"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleFieldChange}
+                                fullWidth
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                select
+                                label="Gender"
+                                name="gender"
+                                value={formData.gender}
+                                onChange={handleFieldChange}
+                                fullWidth
+                                required
+                                SelectProps={{ displayEmpty: true }}
+                            >
+                                <MenuItem value="" disabled>
+                                    Select gender
+                                </MenuItem>
+                                <MenuItem value="male">Male</MenuItem>
+                                <MenuItem value="female">Female</MenuItem>
+                                <MenuItem value="other">Other</MenuItem>
+                            </TextField>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Message"
+                                name="message"
+                                value={formData.message}
+                                onChange={handleFieldChange}
+                                fullWidth
+                                required
+                                multiline
+                                minRows={3}
+                            />
+                        </Grid>
+                    </Grid>
+                    {formError && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {formError}
+                        </Alert>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 0 }}>
+                    <Button onClick={handleDialogClose} disabled={submitting}>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        disabled={submitting}
+                        sx={{
+                            textTransform: 'none',
+                            borderRadius: '10px',
+                            px: 3,
+                            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        }}
+                    >
+                        {submitting ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
-

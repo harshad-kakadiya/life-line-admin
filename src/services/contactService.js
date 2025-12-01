@@ -9,7 +9,7 @@ const handleResponse = async (response) => {
     return data;
 };
 
-export const contactService = {
+const contactService = {
     async getAll() {
         const response = await fetch(BASE_URL, {
             method: 'GET',
@@ -20,6 +20,18 @@ export const contactService = {
         });
         const data = await handleResponse(response);
         return data?.data ?? [];
+    },
+
+    async create(contactData) {
+        const response = await fetch(BASE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify(contactData),
+        });
+        return handleResponse(response);
     },
 
     async delete(id) {
@@ -36,5 +48,6 @@ export const contactService = {
     },
 };
 
-
+export { contactService };
+export default contactService;
 
