@@ -4,7 +4,7 @@
 let mockPressReleases = [];
 let nextId = 1;
 
-export const pressReleaseService = {
+const pressReleaseService = {
     // Get all press releases
     async getAll() {
         // TODO: Replace with actual API call
@@ -92,4 +92,5 @@ export const pressReleaseService = {
     },
 };
 
-
+export { pressReleaseService };
+export default pressReleaseService;
