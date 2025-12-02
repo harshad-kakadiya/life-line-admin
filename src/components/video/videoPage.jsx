@@ -21,7 +21,6 @@ import {
     Modal,
     Paper,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
@@ -39,6 +38,8 @@ export default function VideoPage() {
         title: '',
         description: '',
         videoUrl: '',
+        image: null,
+        imageUrl: '',
     });
     const [loading, setLoading] = useState(false);
 
@@ -64,17 +65,8 @@ export default function VideoPage() {
             title: '',
             description: '',
             videoUrl: '',
-        });
-        setOpenDialog(true);
-    };
-
-    const handleOpenEditDialog = (video, e) => {
-        e?.stopPropagation();
-        setEditingVideo(video);
-        setFormData({
-            title: video.title || '',
-            description: video.description || '',
-            videoUrl: video.videoUrl || '',
+            image: null,
+            imageUrl: '',
         });
         setOpenDialog(true);
     };
@@ -96,6 +88,8 @@ export default function VideoPage() {
             title: '',
             description: '',
             videoUrl: '',
+            image: null,
+            imageUrl: '',
         });
     };
 
@@ -107,6 +101,21 @@ export default function VideoPage() {
         }));
     };
 
+    const handleImageFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData((prev) => ({
+                    ...prev,
+                    image: file,
+                    imageUrl: reader.result,
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async () => {
         if (!formData.title || !formData.description || !formData.videoUrl) {
             alert('Please fill in all required fields, including the video link');
@@ -115,11 +124,7 @@ export default function VideoPage() {
 
         setLoading(true);
         try {
-            if (editingVideo) {
-                await videoService.update(editingVideo.id, formData);
-            } else {
-                await videoService.create(formData);
-            }
+            await videoService.create(formData);
             await loadVideos();
             handleCloseDialog();
         } catch (error) {
@@ -274,21 +279,36 @@ export default function VideoPage() {
                                         overflow: 'hidden',
                                     }}
                                 >
-                                    {video.videoUrl ? (
+                                    {video.image || video.videoUrl ? (
                                         <>
-                                            <video
-                                                className="video-thumbnail"
-                                                src={video.videoUrl}
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    objectFit: 'cover',
-                                                    transition: 'transform 0.5s ease',
-                                                }}
-                                                muted
-                                                loop
-                                                playsInline
-                                            />
+                                            {video.image ? (
+                                                <Box
+                                                    component="img"
+                                                    src={video.image}
+                                                    alt={video.title}
+                                                    className="video-thumbnail"
+                                                    sx={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover',
+                                                        transition: 'transform 0.5s ease',
+                                                    }}
+                                                />
+                                            ) : (
+                                                <video
+                                                    className="video-thumbnail"
+                                                    src={video.videoUrl}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover',
+                                                        transition: 'transform 0.5s ease',
+                                                    }}
+                                                    muted
+                                                    loop
+                                                    playsInline
+                                                />
+                                            )}
                                             <Box
                                                 className="play-overlay"
                                                 sx={{
@@ -398,36 +418,20 @@ export default function VideoPage() {
                                                 Click to play
                                             </Typography>
                                         </Box>
-                                        <Box sx={{ display: 'flex', gap: 1 }}>
-                                            <IconButton
-                                                onClick={(e) => handleOpenEditDialog(video, e)}
-                                                sx={{
-                                                    color: '#667eea',
-                                                    background: 'rgba(102, 126, 234, 0.1)',
-                                                    '&:hover': {
-                                                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
-                                                        transform: 'scale(1.1)',
-                                                    },
-                                                    transition: 'all 0.2s ease',
-                                                }}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={(e) => handleDelete(video.id ?? video._id, e)}
-                                                sx={{
-                                                    color: '#ef4444',
-                                                    background: 'rgba(248, 113, 113, 0.1)',
-                                                    '&:hover': {
-                                                        backgroundColor: 'rgba(248, 113, 113, 0.2)',
-                                                        transform: 'scale(1.05)',
-                                                    },
-                                                    transition: 'all 0.2s ease',
-                                                }}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Box>
+                                        <IconButton
+                                            onClick={(e) => handleDelete(video.id ?? video._id, e)}
+                                            sx={{
+                                                color: '#ef4444',
+                                                background: 'rgba(248,113,113,0.1)',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(248,113,113,0.2)',
+                                                    transform: 'scale(1.05)',
+                                                },
+                                                transition: 'all 0.2s ease',
+                                            }}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
                                     </Box>
                                 </Box>
                             </Card>
@@ -571,10 +575,55 @@ export default function VideoPage() {
                                     },
                                 }}
                             />
+                            <Box>
+                                <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 500, color: '#475569' }}>
+                                    Image (Thumbnail)
+                                </Typography>
+                                <Box
+                                    sx={{
+                                        border: '2px dashed #cbd5e1',
+                                        borderRadius: '12px',
+                                        p: 3,
+                                        textAlign: 'center',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            borderColor: '#667eea',
+                                            backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                                        },
+                                    }}
+                                >
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageFileChange}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                        }}
+                                    />
+                                </Box>
+                                {formData.imageUrl && (
+                                    <Box sx={{ mt: 2 }}>
+                                        <img
+                                            src={formData.imageUrl}
+                                            alt="Preview"
+                                            style={{
+                                                width: '100%',
+                                                maxHeight: '300px',
+                                                objectFit: 'contain',
+                                                borderRadius: '12px',
+                                                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                                            }}
+                                        />
+                                    </Box>
+                                )}
+                            </Box>
                             {formData.videoUrl && (
                                 <Box sx={{ mt: 2 }}>
                                     <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#475569' }}>
-                                        Preview
+                                        Video Preview
                                     </Typography>
                                     <video
                                         src={formData.videoUrl}

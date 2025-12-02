@@ -1,94 +1,113 @@
-// Press Release Service - API layer for press release operations
-// When API is available, replace the mock implementation with actual API calls
+const BASE_URL = 'https://life-line-be.onrender.com/api/press-release';
 
-let mockPressReleases = [];
-let nextId = 1;
+const handleResponse = async (response) => {
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+        const message = data?.message || 'Unable to process press release request';
+        throw new Error(message);
+    }
+    return data;
+};
+
+// Normalize API response to match component expectations
+const normalizePressRelease = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        id: item._id || item.id,
+        imageUrl: item.image || item.imageUrl,
+        publishDate: item.date || item.publishDate,
+    };
+};
 
 const pressReleaseService = {
     // Get all press releases
     async getAll() {
-        // TODO: Replace with actual API call
-        // Example: const response = await fetch('/api/press-release');
-        // return await response.json();
-        
-        return mockPressReleases;
+        const response = await fetch(BASE_URL, {
+            cache: 'no-store',
+            headers: { Accept: 'application/json' },
+        });
+        const data = await handleResponse(response);
+        const items = data?.data ?? [];
+        return items.map(normalizePressRelease);
     },
 
     // Get press release by ID
     async getById(id) {
-        // TODO: Replace with actual API call
-        // Example: const response = await fetch(`/api/press-release/${id}`);
-        // return await response.json();
-        
-        return mockPressReleases.find(pressRelease => pressRelease.id === id);
+        if (!id) {
+            throw new Error('Press release id is required');
+        }
+        const response = await fetch(`${BASE_URL}/${id}`, {
+            headers: { Accept: 'application/json' },
+        });
+        const data = await handleResponse(response);
+        return normalizePressRelease(data?.data || data);
     },
 
     // Create new press release
     async create(pressReleaseData) {
-        // TODO: Replace with actual API call
-        // Example:
-        // const formData = new FormData();
-        // formData.append('title', pressReleaseData.title);
-        // formData.append('link', pressReleaseData.link);
-        // formData.append('image', pressReleaseData.image);
-        // const response = await fetch('/api/press-release', {
-        //     method: 'POST',
-        //     body: formData,
-        // });
-        // return await response.json();
+        const formData = new FormData();
+        formData.append('title', pressReleaseData.title);
+        formData.append('date', pressReleaseData.publishDate);
         
-        const newPressRelease = {
-            id: nextId++,
-            title: pressReleaseData.title,
-            publishDate: pressReleaseData.publishDate,
-            imageUrl: pressReleaseData.imageUrl,
-            createdAt: new Date().toISOString(),
-        };
-        mockPressReleases.push(newPressRelease);
-        return newPressRelease;
+        if (pressReleaseData.image) {
+            formData.append('image', pressReleaseData.image);
+        }
+
+        const response = await fetch(BASE_URL, {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await handleResponse(response);
+        return normalizePressRelease(data?.data || data);
     },
 
     // Update press release
     async update(id, pressReleaseData) {
-        // TODO: Replace with actual API call
-        // Example:
-        // const formData = new FormData();
-        // formData.append('title', pressReleaseData.title);
-        // formData.append('link', pressReleaseData.link);
-        // if (pressReleaseData.image) {
-        //     formData.append('image', pressReleaseData.image);
-        // }
-        // const response = await fetch(`/api/press-release/${id}`, {
-        //     method: 'PUT',
-        //     body: formData,
-        // });
-        // return await response.json();
-        
-        const index = mockPressReleases.findIndex(pressRelease => pressRelease.id === id);
-        if (index !== -1) {
-            mockPressReleases[index] = {
-                ...mockPressReleases[index],
-                title: pressReleaseData.title,
-                publishDate: pressReleaseData.publishDate,
-                imageUrl: pressReleaseData.imageUrl || mockPressReleases[index].imageUrl,
-                updatedAt: new Date().toISOString(),
-            };
-            return mockPressReleases[index];
+        if (!id) {
+            throw new Error('Press release id is required');
         }
-        throw new Error('Press release not found');
+
+        // If a new file is provided, send multipart/form-data; otherwise send JSON
+        let response;
+        if (pressReleaseData.image) {
+            const formData = new FormData();
+            formData.append('title', pressReleaseData.title);
+            formData.append('date', pressReleaseData.publishDate);
+            formData.append('image', pressReleaseData.image);
+            
+            response = await fetch(`${BASE_URL}/${id}`, {
+                method: 'PUT',
+                body: formData,
+            });
+        } else {
+            response = await fetch(`${BASE_URL}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                    title: pressReleaseData.title,
+                    date: pressReleaseData.publishDate,
+                    image: pressReleaseData.imageUrl,
+                }),
+            });
+        }
+        const data = await handleResponse(response);
+        return normalizePressRelease(data?.data || data);
     },
 
     // Delete press release
     async delete(id) {
-        // TODO: Replace with actual API call
-        // Example: await fetch(`/api/press-release/${id}`, { method: 'DELETE' });
-        
-        const index = mockPressReleases.findIndex(pressRelease => pressRelease.id === id);
-        if (index !== -1) {
-            mockPressReleases.splice(index, 1);
-            return true;
+        if (!id) {
+            throw new Error('Press release id is required');
         }
-        throw new Error('Press release not found');
+        const response = await fetch(`${BASE_URL}/${id}`, {
+            method: 'DELETE',
+            headers: { Accept: 'application/json' },
+        });
+        return handleResponse(response);
     },
 };
 

@@ -29,7 +29,7 @@ function Navbar() {
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
                         <Image
-                            src="/assets/images/logo.png"
+                            src="/assets/images/img.png"
                             alt="Logo"
                             width={140}
                             height={45}

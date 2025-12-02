@@ -20,11 +20,10 @@ import {
     CircularProgress,
     Chip,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import ArticleIcon from '@mui/icons-material/Article';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { pressReleaseService } from '@/services/pressReleaseService';
 
 export default function PressReleasePage() {
@@ -62,19 +61,6 @@ export default function PressReleasePage() {
             publishDate: '',
             image: null,
             imageUrl: '',
-        });
-        setOpenDialog(true);
-    };
-
-    const handleOpenEditDialog = (pressRelease) => {
-        setEditingPressRelease(pressRelease);
-        setFormData({
-            title: pressRelease.title || '',
-            publishDate: pressRelease.publishDate
-                ? new Date(pressRelease.publishDate).toISOString().slice(0, 10)
-                : '',
-            image: null,
-            imageUrl: pressRelease.imageUrl || '',
         });
         setOpenDialog(true);
     };
@@ -121,11 +107,7 @@ export default function PressReleasePage() {
 
         setLoading(true);
         try {
-            if (editingPressRelease) {
-                await pressReleaseService.update(editingPressRelease.id, formData);
-            } else {
-                await pressReleaseService.create(formData);
-            }
+            await pressReleaseService.create(formData);
             await loadPressReleases();
             handleCloseDialog();
         } catch (error) {
@@ -268,42 +250,18 @@ export default function PressReleasePage() {
                                                 : 'No date provided'}
                                         </Typography>
                                     </CardContent>
-                                    <CardActions sx={{ p: 2, pt: 0, justifyContent: 'space-between' }}>
-                                        <Box>
-                                            <Chip
-                                                label="Press Release"
-                                                size="small"
-                                                sx={{
-                                                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                                                    color: '#ffffff',
-                                                    fontWeight: 500,
-                                                }}
-                                            />
-                                        </Box>
-                                        <Box>
-                                            <IconButton
-                                                onClick={() => handleOpenEditDialog(pressRelease)}
-                                                sx={{
-                                                    color: '#4facfe',
-                                                    '&:hover': {
-                                                        backgroundColor: 'rgba(79, 172, 254, 0.1)',
-                                                    },
-                                                }}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={() => handleDelete(pressRelease.id)}
-                                                sx={{
-                                                    color: '#ef4444',
-                                                    '&:hover': {
-                                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                                    },
-                                                }}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Box>
+                                    <CardActions sx={{ p: 2, pt: 0, justifyContent: 'flex-end' }}>
+                                        <IconButton
+                                            onClick={() => handleDelete(pressRelease.id)}
+                                            sx={{
+                                                color: '#ef4444',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(239,68,68,0.1)',
+                                                },
+                                            }}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
                                     </CardActions>
                                 </Card>
                             </Grid>

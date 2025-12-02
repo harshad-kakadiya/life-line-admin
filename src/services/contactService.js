@@ -9,7 +9,7 @@ const handleResponse = async (response) => {
     return data;
 };
 
-const contactService = {
+export const contactService = {
     async getAll() {
         const response = await fetch(BASE_URL, {
             method: 'GET',
@@ -48,6 +48,4 @@ const contactService = {
     },
 };
 
-export { contactService };
-export default contactService;
 

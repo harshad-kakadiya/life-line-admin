@@ -9,11 +9,6 @@ const handleResponse = async (response) => {
     return data;
 };
 
-const jsonHeaders = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-};
-
 export const galleryService = {
     async getAll() {
         const response = await fetch(BASE_URL, {
@@ -25,10 +20,14 @@ export const galleryService = {
     },
 
     async create(photoData) {
+        const formData = new FormData();
+        if (photoData.photo) {
+            formData.append('image', photoData.photo);
+        }
+
         const response = await fetch(BASE_URL, {
             method: 'POST',
-            headers: jsonHeaders,
-            body: JSON.stringify(photoData),
+            body: formData,
         });
         return handleResponse(response);
     },
@@ -37,11 +36,28 @@ export const galleryService = {
         if (!id) {
             throw new Error('Gallery id is required');
         }
-        const response = await fetch(`${BASE_URL}/${id}`, {
-            method: 'PUT',
-            headers: jsonHeaders,
-            body: JSON.stringify(photoData),
-        });
+
+        // If a new file is provided, send multipart/form-data; otherwise send JSON with existing URL
+        let response;
+        if (photoData.photo) {
+            const formData = new FormData();
+            formData.append('image', photoData.photo);
+            response = await fetch(`${BASE_URL}/${id}`, {
+                method: 'PUT',
+                body: formData,
+            });
+        } else {
+            response = await fetch(`${BASE_URL}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                    image: photoData.photoUrl,
+                }),
+            });
+        }
         return handleResponse(response);
     },
 

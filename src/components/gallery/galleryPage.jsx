@@ -18,10 +18,9 @@ import {
     CircularProgress,
     Fade,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { galleryService } from '@/services/galleryService';
 
 export default function GalleryPage() {
@@ -64,15 +63,6 @@ export default function GalleryPage() {
         setOpenDialog(true);
     };
 
-    const handleOpenEditDialog = (photo) => {
-        setEditingPhoto(photo);
-        setFormData({
-            photo: null,
-            photoUrl: photo.photoUrl || '',
-        });
-        setOpenDialog(true);
-    };
-
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setEditingPhoto(null);
@@ -85,7 +75,6 @@ export default function GalleryPage() {
     const handlePhotoFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            console.log(flie)
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData((prev) => ({
@@ -99,18 +88,14 @@ export default function GalleryPage() {
     };
 
     const handleSubmit = async () => {
-        if (!formData.photo && !editingPhoto) {
+        if (!formData.photo && !formData.photoUrl && !editingPhoto) {
             alert('Please select a photo');
             return;
         }
 
         setLoading(true);
         try {
-            if (editingPhoto) {
-                await galleryService.update(editingPhoto.id, formData);
-            } else {
-                await galleryService.create(formData);
-            }
+            await galleryService.create(formData);
             await loadPhotos();
             handleCloseDialog();
         } catch (error) {
@@ -132,7 +117,7 @@ export default function GalleryPage() {
             await loadPhotos();
         } catch (error) {
             console.error('Error deleting photo:', error);
-            alert('Error deleting photo. Please try again.');
+            alert(`Error deleting photo: ${error.message || 'Please try again.'}`);
         } finally {
             setLoading(false);
         }
@@ -210,7 +195,14 @@ export default function GalleryPage() {
                 ) : (
                     <Grid container spacing={3}>
                         {photos.map((photo, index) => (
-                            <Grid item xs={12} sm={6} md={4} lg={3} key={photo.id}>
+                            <Grid
+                                item
+                                xs={12}
+                                sm={6}
+                                md={4}
+                                lg={3}
+                                key={photo._id ?? photo.id ?? index}
+                            >
                                 <Fade in timeout={300 + index * 100}>
                                     <Card
                                         sx={{
@@ -226,9 +218,6 @@ export default function GalleryPage() {
                                             '&:hover': {
                                                 transform: 'translateY(-8px) scale(1.02)',
                                                 boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-                                                '& .photo-overlay': {
-                                                    opacity: 1,
-                                                },
                                             },
                                         }}
                                     >
@@ -246,53 +235,31 @@ export default function GalleryPage() {
                                                     },
                                                 }}
                                             />
+                                            {/* floating delete button */}
                                             <Box
-                                                className="photo-overlay"
                                                 sx={{
                                                     position: 'absolute',
-                                                    top: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    bottom: 0,
-                                                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                                                    opacity: 0,
-                                                    transition: 'opacity 0.3s ease',
-                                                    display: 'flex',
-                                                    alignItems: 'flex-end',
-                                                    justifyContent: 'center',
-                                                    pb: 2,
+                                                    top: 12,
+                                                    right: 12,
+                                                    backgroundColor: 'rgba(0,0,0,0.45)',
+                                                    borderRadius: '999px',
                                                 }}
                                             >
-                                                <Box sx={{ display: 'flex', gap: 1 }}>
-                                                    <IconButton
-                                                        onClick={() => handleOpenEditDialog(photo)}
-                                                        sx={{
-                                                            color: '#ffffff',
-                                                            background: 'rgba(255,255,255,0.2)',
-                                                            backdropFilter: 'blur(10px)',
-                                                            '&:hover': {
-                                                                background: 'rgba(255,255,255,0.3)',
-                                                            },
-                                                        }}
-                                                    >
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                    <IconButton
-                                                        onClick={() => handleDelete(photo.id)}
-                                                        sx={{
-                                                            color: '#ffffff',
-                                                            background: 'rgba(255,255,255,0.2)',
-                                                            backdropFilter: 'blur(10px)',
-                                                            '&:hover': {
-                                                                background: 'rgba(239, 68, 68, 0.8)',
-                                                            },
-                                                        }}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleDelete(photo._id ?? photo.id)}
+                                                    sx={{
+                                                        color: '#ffffff',
+                                                        '&:hover': {
+                                                            backgroundColor: 'rgba(239,68,68,0.9)',
+                                                        },
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
                                             </Box>
                                         </Box>
+                                        {/* mobile delete button */}
                                         <CardActions
                                             sx={{
                                                 justifyContent: 'center',
@@ -301,22 +268,11 @@ export default function GalleryPage() {
                                             }}
                                         >
                                             <IconButton
-                                                onClick={() => handleOpenEditDialog(photo)}
-                                                sx={{
-                                                    color: '#f5576c',
-                                                    '&:hover': {
-                                                        backgroundColor: 'rgba(245, 87, 108, 0.1)',
-                                                    },
-                                                }}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={() => handleDelete(photo.id)}
+                                                onClick={() => handleDelete(photo._id ?? photo.id)}
                                                 sx={{
                                                     color: '#ef4444',
                                                     '&:hover': {
-                                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                        backgroundColor: 'rgba(239,68,68,0.1)',
                                                     },
                                                 }}
                                             >
