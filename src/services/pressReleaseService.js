@@ -17,6 +17,7 @@ const normalizePressRelease = (item) => {
         id: item._id || item.id,
         imageUrl: item.image || item.imageUrl,
         publishDate: item.date || item.publishDate,
+        link: item.link || item.url || '',
     };
 };
 
@@ -49,6 +50,7 @@ const pressReleaseService = {
         const formData = new FormData();
         formData.append('title', pressReleaseData.title);
         formData.append('date', pressReleaseData.publishDate);
+        formData.append('link', pressReleaseData.link || '');
         
         if (pressReleaseData.image) {
             formData.append('image', pressReleaseData.image);
@@ -74,6 +76,7 @@ const pressReleaseService = {
             const formData = new FormData();
             formData.append('title', pressReleaseData.title);
             formData.append('date', pressReleaseData.publishDate);
+            formData.append('link', pressReleaseData.link || '');
             formData.append('image', pressReleaseData.image);
             
             response = await fetch(`${BASE_URL}/${id}`, {
@@ -90,6 +93,7 @@ const pressReleaseService = {
                 body: JSON.stringify({
                     title: pressReleaseData.title,
                     date: pressReleaseData.publishDate,
+                    link: pressReleaseData.link || '',
                     image: pressReleaseData.imageUrl,
                 }),
             });

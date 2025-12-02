@@ -18,7 +18,6 @@ import {
     TextField,
     Box,
     CircularProgress,
-    Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -33,6 +32,7 @@ export default function PressReleasePage() {
     const [formData, setFormData] = useState({
         title: '',
         publishDate: '',
+        link: '',
         image: null,
         imageUrl: '',
     });
@@ -59,6 +59,7 @@ export default function PressReleasePage() {
         setFormData({
             title: '',
             publishDate: '',
+            link: '',
             image: null,
             imageUrl: '',
         });
@@ -71,6 +72,7 @@ export default function PressReleasePage() {
         setFormData({
             title: '',
             publishDate: '',
+            link: '',
             image: null,
             imageUrl: '',
         });
@@ -100,8 +102,8 @@ export default function PressReleasePage() {
     };
 
     const handleSubmit = async () => {
-        if (!formData.title || !formData.publishDate || (!formData.image && !editingPressRelease)) {
-            alert('Please fill in all required fields and select an image');
+        if (!formData.title || !formData.publishDate || !formData.link || (!formData.image && !editingPressRelease)) {
+            alert('Please fill in all required fields, including the link, and select an image');
             return;
         }
 
@@ -249,8 +251,36 @@ export default function PressReleasePage() {
                                                 ? new Date(pressRelease.publishDate).toLocaleDateString()
                                                 : 'No date provided'}
                                         </Typography>
+                                        {pressRelease.link && (
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: '#0284c7',
+                                                    wordBreak: 'break-all',
+                                                    mt: 1,
+                                                }}
+                                            >
+                                                {pressRelease.link}
+                                            </Typography>
+                                        )}
                                     </CardContent>
                                     <CardActions sx={{ p: 2, pt: 0, justifyContent: 'flex-end' }}>
+                                        {pressRelease.link && (
+                                            <Button
+                                                size="small"
+                                                component="a"
+                                                href={pressRelease.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                startIcon={<OpenInNewIcon />}
+                                                sx={{
+                                                    textTransform: 'none',
+                                                    color: '#2563eb',
+                                                }}
+                                            >
+                                                Visit Link
+                                            </Button>
+                                        )}
                                         <IconButton
                                             onClick={() => handleDelete(pressRelease.id)}
                                             sx={{
@@ -317,6 +347,22 @@ export default function PressReleasePage() {
                                 required
                                 InputLabelProps={{ shrink: true }}
                                 helperText="Select the date this press release is published"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '12px',
+                                    },
+                                }}
+                            />
+                            <TextField
+                                label="Link"
+                                name="link"
+                                type="url"
+                                value={formData.link}
+                                onChange={handleInputChange}
+                                fullWidth
+                                required
+                                placeholder="https://example.com/press-release"
+                                helperText="Provide the destination link for this press release"
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: '12px',
