@@ -197,10 +197,11 @@ export default function GalleryPage() {
                         {photos.map((photo, index) => (
                             <Grid
                                 item
-                                xs={12}
-                                sm={6}
-                                md={4}
-                                lg={3}
+                                size={{
+                                    xs:12,
+                                    sm:6,
+                                    md:4,
+                                }}
                                 key={photo._id ?? photo.id ?? index}
                             >
                                 <Fade in timeout={300 + index * 100}>
