@@ -274,24 +274,6 @@ export default function ContactPage() {
                                 </IconButton>
                             </span>
                         </Tooltip>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            onClick={handleOpenDialog}
-                            sx={{
-                                textTransform: 'none',
-                                px: 3,
-                                py: 1.5,
-                                borderRadius: '12px',
-                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                                boxShadow: '0 6px 20px rgba(99, 102, 241, 0.35)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                                },
-                            }}
-                        >
-                            Add Contact
-                        </Button>
                     </Box>
                 </Box>
 

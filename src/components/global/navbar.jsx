@@ -12,6 +12,7 @@ function Navbar() {
     const navItems = [
         { path: '/video', label: 'Video' },
         { path: '/gallery', label: 'Gallery' },
+        { path: '/slide-image', label: 'Slide Image' },
         { path: '/press-release', label: 'Press Release' },
         { path: '/contact', label: 'Contact' },
     ];

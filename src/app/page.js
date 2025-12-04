@@ -7,6 +7,7 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import ArticleIcon from '@mui/icons-material/Article';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
+import SlideshowIcon from '@mui/icons-material/Slideshow';
 
 export default function Home() {
     const features = [
@@ -37,6 +38,13 @@ export default function Home() {
             icon: <ContactMailIcon sx={{ fontSize: 48, color: '#14b8a6' }} />,
             link: '/contact',
             color: 'linear-gradient(135deg, #34e89e 0%, #0f3443 100%)',
+        },
+        {
+            title: 'Slide Image',
+            description: 'Manage and organize slide images for your content',
+            icon: <SlideshowIcon sx={{ fontSize: 48, color: '#f97316' }} />,
+            link: '/slide-image',
+            color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
         },
     ];
 
