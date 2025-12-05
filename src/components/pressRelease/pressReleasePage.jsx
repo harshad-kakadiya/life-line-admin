@@ -102,7 +102,7 @@ export default function PressReleasePage() {
     };
 
     const handleSubmit = async () => {
-        if (!formData.title || !formData.publishDate || !formData.link || (!formData.image && !editingPressRelease)) {
+        if (!formData.title || !formData.publishDate || (!formData.image && !editingPressRelease)) {
             alert('Please fill in all required fields, including the link, and select an image');
             return;
         }
@@ -360,7 +360,6 @@ export default function PressReleasePage() {
                                 value={formData.link}
                                 onChange={handleInputChange}
                                 fullWidth
-                                required
                                 placeholder="https://example.com/press-release"
                                 helperText="Provide the destination link for this press release"
                                 sx={{
