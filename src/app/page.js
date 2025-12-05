@@ -10,6 +10,7 @@ import ContactMailIcon from '@mui/icons-material/ContactMail';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
 import PersonIcon from '@mui/icons-material/Person';
 
+
 export default function Home() {
     const features = [
         {
