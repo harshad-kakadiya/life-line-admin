@@ -36,6 +36,7 @@ function Navbar() {
         { path: '/contact', label: 'Contact' },
         { path: '/person-detail', label: 'Person Detail' },
         { path: '/category', label: 'Category' },
+        { path: '/about', label: 'About' },
     ];
 
     const handleDrawerToggle = () => {

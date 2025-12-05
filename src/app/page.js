@@ -10,6 +10,7 @@ import ContactMailIcon from '@mui/icons-material/ContactMail';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
 import PersonIcon from '@mui/icons-material/Person';
 import CategoryIcon from '@mui/icons-material/Category';
+import InfoIcon from '@mui/icons-material/Info';
 
 
 export default function Home() {
@@ -63,6 +64,13 @@ export default function Home() {
             link: '/category',
             color: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
         },
+        {
+            title: 'About',
+            description: 'Manage about page entries with team member information',
+            icon: InfoIcon,
+            link: '/about',
+            color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        },
     ];
 
     return (
@@ -113,10 +121,21 @@ export default function Home() {
                     }}
                 >
                     {features.map((feature, index) => {
-                        const isSeventhItem = features.length === 7 && index === 6;
+                        const isSeventhItem = features.length === 8 && index === 6;
+                        const isEighthItem = features.length === 8 && index === 7;
                         return (
                             <React.Fragment key={index}>
                                 {isSeventhItem && (
+                                    <Grid
+                                        item
+                                        xs={0}
+                                        sm={0}
+                                        md={4}
+                                        lg={4}
+                                        sx={{display: {xs: 'none', sm: 'none', md: 'block'}}}
+                                    />
+                                )}
+                                {isEighthItem && (
                                     <Grid
                                         item
                                         xs={0}
