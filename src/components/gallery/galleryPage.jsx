@@ -265,7 +265,7 @@ export default function GalleryPage() {
                                 </TableHead>
                                 <TableBody>
                                     {photos.map((photo) => {
-                                        const categoryName = categories.find(cat => (cat._id ?? cat.id) === photo.category)?.categoryname ?? categories.find(cat => (cat._id ?? cat.id) === photo.category)?.name ?? '—';
+                                        const categoryName = photo?.category?.categoryname;
                                         return (
                                             <TableRow
                                                 key={photo._id ?? photo.id}
