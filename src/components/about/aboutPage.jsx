@@ -30,6 +30,8 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonIcon from '@mui/icons-material/Person';
 import { aboutService } from '@/services/aboutService';
+import Cropper from "react-easy-crop";
+import Slider from "@mui/material/Slider";
 
 export default function AboutPage() {
     const [aboutEntries, setAboutEntries] = useState([]);
@@ -45,6 +47,10 @@ export default function AboutPage() {
     });
     const [loading, setLoading] = useState(false);
     const [feedback, setFeedback] = useState({ type: '', message: '' });
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [rawImage, setRawImage] = useState(null);
 
     React.useEffect(() => {
         loadAboutEntries();
@@ -89,8 +95,13 @@ export default function AboutPage() {
             mobile: entry.mobile || '',
             email: entry.email || '',
         });
+
+        // 🔥 Fix: show existing image in cropper
+        setRawImage(entry.image || '');
+
         setOpenDialog(true);
     };
+
 
     const handleCloseDialog = () => {
         setOpenDialog(false);
@@ -103,7 +114,12 @@ export default function AboutPage() {
             mobile: '',
             email: '',
         });
+        setRawImage(null); // 🔥 Reset cropper
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setCroppedAreaPixels(null);
     };
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -112,6 +128,46 @@ export default function AboutPage() {
             [name]: value,
         }));
     };
+
+    const onCropComplete = (_, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    };
+
+    async function getCroppedImgBlob(imageSrc, croppedAreaPixels) {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.src = imageSrc;
+
+        await new Promise((res, rej) => {
+            image.onload = res;
+            image.onerror = rej;
+        });
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = croppedAreaPixels.width;
+        canvas.height = croppedAreaPixels.height;
+
+        ctx.drawImage(
+            image,
+            croppedAreaPixels.x,
+            croppedAreaPixels.y,
+            croppedAreaPixels.width,
+            croppedAreaPixels.height,
+            0,
+            0,
+            croppedAreaPixels.width,
+            croppedAreaPixels.height
+        );
+
+        return new Promise((resolve) => {
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, "image/jpeg", 0.9);
+        });
+    }
+
 
     const handleImageFileChange = (e) => {
         const file = e.target.files[0];
@@ -129,7 +185,7 @@ export default function AboutPage() {
     };
 
     const handleSubmit = async () => {
-        if (!formData.name || !formData.designation || !formData.mobile || !formData.email) {
+        if (!formData.name || !formData.designation || !formData.mobile) {
             setFeedback({
                 type: 'error',
                 message: 'Please fill in all required fields: Name, Designation, Mobile, and Email',
@@ -146,23 +202,36 @@ export default function AboutPage() {
         }
 
         setLoading(true);
+
         try {
+            let finalImageFile = formData.image; // original uploaded file
+
+            if (rawImage && croppedAreaPixels) {
+                // Convert cropped image to Blob/File
+                const croppedBlob = await getCroppedImgBlob(rawImage, croppedAreaPixels);
+                finalImageFile = new File([croppedBlob], formData.image?.name || 'cropped.jpg', {
+                    type: 'image/jpeg',
+                });
+            }
+
             const aboutData = {
                 name: formData.name,
                 designation: formData.designation,
                 mobile: formData.mobile,
                 email: formData.email,
-                imageFile: formData.image,
-                image: formData.imageUrl,
+                imageFile: finalImageFile, // send the binary file
             };
 
             if (editingEntry) {
-                await aboutService.update(editingEntry.id || editingEntry._id, aboutData);
+                // 🔥 Ensure correct ID
+                const entryId = editingEntry.id || editingEntry._id;
+                await aboutService.update(entryId, aboutData);
                 setFeedback({ type: 'success', message: 'About entry updated successfully' });
             } else {
                 await aboutService.create(aboutData);
                 setFeedback({ type: 'success', message: 'About entry added successfully' });
             }
+
             await loadAboutEntries();
             handleCloseDialog();
         } catch (error) {
@@ -249,7 +318,7 @@ export default function AboutPage() {
                     </TableHead>
                     <TableBody>
                         {aboutEntries.map((entry) => (
-                            <TableRow 
+                            <TableRow
                                 key={entry.id || entry._id}
                                 sx={{
                                     '&:hover': {
@@ -342,11 +411,11 @@ export default function AboutPage() {
     return (
         <Box sx={{ minHeight: 'calc(100vh - 64px)', background: 'linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%)', py: 4 }}>
             <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-                <Box sx={{ 
-                    display: 'flex', 
+                <Box sx={{
+                    display: 'flex',
                     flexDirection: { xs: 'column', sm: 'row' },
-                    justifyContent: 'space-between', 
-                    alignItems: { xs: 'flex-start', sm: 'center' }, 
+                    justifyContent: 'space-between',
+                    alignItems: { xs: 'flex-start', sm: 'center' },
                     mb: 4,
                     gap: { xs: 2, sm: 0 }
                 }}>
@@ -354,9 +423,9 @@ export default function AboutPage() {
                         <Typography
                             variant="h4"
                             component="h1"
-                            sx={{ 
-                                fontWeight: 700, 
-                                color: '#1e293b', 
+                            sx={{
+                                fontWeight: 700,
+                                color: '#1e293b',
                                 mb: 0.5,
                                 fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
                             }}
@@ -493,7 +562,6 @@ export default function AboutPage() {
                             value={formData.email}
                             onChange={handleInputChange}
                             fullWidth
-                            required
                             variant="outlined"
                             placeholder="example@email.com"
                             helperText="Enter the email address"
@@ -503,52 +571,71 @@ export default function AboutPage() {
                                 },
                             }}
                         />
-                        <Box>
-                            <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 500, color: '#475569' }}>
-                                {editingEntry ? 'Update Image (optional)' : 'Select Image *'}
-                            </Typography>
-                            <Box
-                                sx={{
-                                    border: '2px dashed #cbd5e1',
-                                    borderRadius: '12px',
-                                    p: 4,
-                                    textAlign: 'center',
-                                    transition: 'all 0.3s ease',
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                        borderColor: '#10b981',
-                                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                                    },
-                                }}
-                            >
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageFileChange}
-                                    style={{
-                                        width: '100%',
-                                        padding: '8px',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
+                        {rawImage ? (
+                            <>
+                                <Box
+                                    sx={{
+                                        position: "relative",
+                                        width: "100%",
+                                        height: 300,
+                                        background: "#333",
                                     }}
-                                />
-                            </Box>
-                            {formData.imageUrl && (
-                                <Box sx={{ mt: 2 }}>
-                                    <img
-                                        src={formData.imageUrl}
-                                        alt="Preview"
-                                        style={{
-                                            width: '100%',
-                                            maxHeight: '400px',
-                                            objectFit: 'contain',
-                                            borderRadius: '12px',
-                                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                                        }}
+                                >
+                                    <Cropper
+                                        image={rawImage}
+                                        crop={crop}
+                                        zoom={zoom}
+                                        aspect={1}
+                                        cropShape="round"         // 🔥 Big circle view like iPhone
+                                        showGrid={false}
+                                        onCropChange={setCrop}
+                                        onZoomChange={setZoom}
+                                        onCropComplete={onCropComplete}
                                     />
                                 </Box>
-                            )}
-                        </Box>
+
+                                {/* Zoom Slider */}
+                                <Box sx={{ px: 4, mt: 2 }}>
+                                    <Slider
+                                        min={1}
+                                        max={3}
+                                        step={0.1}
+                                        value={zoom}
+                                        onChange={(e, z) => setZoom(z)}
+                                    />
+                                </Box>
+                            </>
+                        ) : (
+                            <Button
+                                variant="outlined"
+                                onClick={() => document.getElementById("imageInput").click()}
+                                sx={{ mt: 2 }}
+                            >
+                                Upload Image
+                            </Button>
+                        )}
+
+                        <input
+                            id="imageInput"
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    const previewUrl = URL.createObjectURL(file);
+
+                                    setRawImage(previewUrl); // For cropper preview
+
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        image: file,           // Important for backend
+                                        imageUrl: previewUrl   // Prevents "Please select an image"
+                                    }));
+                                }
+                            }}
+                        />
+
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, pt: 2 }}>
