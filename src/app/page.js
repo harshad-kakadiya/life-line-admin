@@ -11,6 +11,7 @@ import SlideshowIcon from '@mui/icons-material/Slideshow';
 import PersonIcon from '@mui/icons-material/Person';
 import CategoryIcon from '@mui/icons-material/Category';
 import InfoIcon from '@mui/icons-material/Info';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 
 export default function Home() {
@@ -71,6 +72,13 @@ export default function Home() {
             link: '/about',
             color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
         },
+        {
+            title: 'Location',
+            description: 'Manage location links and Google Maps URLs',
+            icon: LocationOnIcon,
+            link: '/location',
+            color: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+        },
     ];
 
     return (
@@ -121,8 +129,9 @@ export default function Home() {
                     }}
                 >
                     {features.map((feature, index) => {
-                        const isSeventhItem = features.length === 8 && index === 6;
-                        const isEighthItem = features.length === 8 && index === 7;
+                        const isSeventhItem = features.length === 9 && index === 6;
+                        const isEighthItem = features.length === 9 && index === 7;
+                        const isNinthItem = features.length === 9 && index === 8;
                         return (
                             <React.Fragment key={index}>
                                 {isSeventhItem && (
@@ -136,6 +145,16 @@ export default function Home() {
                                     />
                                 )}
                                 {isEighthItem && (
+                                    <Grid
+                                        item
+                                        xs={0}
+                                        sm={0}
+                                        md={4}
+                                        lg={4}
+                                        sx={{display: {xs: 'none', sm: 'none', md: 'block'}}}
+                                    />
+                                )}
+                                {isNinthItem && (
                                     <Grid
                                         item
                                         xs={0}
