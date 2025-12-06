@@ -26,6 +26,7 @@ function Navbar() {
     const pathname = usePathname();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const navItems = [
@@ -47,7 +48,7 @@ function Navbar() {
     const drawer = (
         <Box sx={{ width: 280, pt: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 2 }}>
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} onClick={handleDrawerToggle}>
                     <Image
                         src="/assets/images/img.png"
                         alt="Logo"
@@ -93,63 +94,104 @@ function Navbar() {
 
     return (
         <>
+            {/* Top Teal/Greenish-Blue Bar */}
+            <Box
+                sx={{
+                    width: '100%',
+                    height: '4px',
+                    backgroundColor: '#2d7a7a',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: theme.zIndex.drawer + 2,
+                }}
+            />
+            
             <AppBar 
                 position="sticky" 
                 sx={{ 
                     backgroundColor: '#ffffff',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    top: '4px',
+                    zIndex: theme.zIndex.drawer + 1,
                 }}
             >
-                <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2, md: 6 }, py: 1.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                <Toolbar 
+                    sx={{ 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        px: { xs: 1.5, sm: 2, md: 3, lg: 4, xl: 6 }, 
+                        py: 0,
+                        minHeight: '75px !important',
+                        height: '75px',
+                        maxHeight: '75px',
+                        gap: { xs: 1, sm: 1.5, md: 2 },
+                    }}
+                >
+                    {/* Logo - Left Side */}
+                    <Box 
+                        sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            flexShrink: 0,
+                            height: '100%',
+                        }}
+                    >
+                        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', height: '100%' }}>
                             <Image
                                 src="/assets/images/img.png"
                                 alt="Logo"
-                                width={isMobile ? 100 : 140}
-                                height={isMobile ? 32 : 45}
-                                style={{ objectFit: 'contain' }}
+                                width={isMobile ? 70 : isTablet ? 90 : 110}
+                                height={isMobile ? 70 : isTablet ? 75 : 75}
+                                style={{ 
+                                    objectFit: 'contain',
+                                    width: 'auto',
+                                    height: '100%',
+                                    maxHeight: '75px',
+                                }}
+                                priority
                             />
                         </Link>
                     </Box>
+
+                    {/* Navigation Menu - Right Side */}
                     {isMobile ? (
                         <IconButton
                             edge="end"
                             color="inherit"
                             aria-label="menu"
                             onClick={handleDrawerToggle}
-                            sx={{ color: '#64748b' }}
+                            sx={{ 
+                                color: '#64748b',
+                                flexShrink: 0,
+                            }}
                         >
                             <MenuIcon />
                         </IconButton>
                     ) : (
-                        <Box sx={{ display: 'flex', gap: { xs: 0.5, lg: 1 }, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <Box 
+                            sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                gap: { md: 0.5, lg: 0.75, xl: 1 },
+                                flexWrap: 'nowrap',
+                                justifyContent: 'flex-end',
+                                flexGrow: 1,
+                                minWidth: 0,
+                            }}
+                        >
                             {navItems.map((item) => (
-                                <Link key={item.path} href={item.path} style={{ textDecoration: 'none' }}>
+                                <Link key={item.path} href={item.path} style={{ textDecoration: 'none', flexShrink: 0 }}>
                                     <Button
                                         sx={{
                                             color: pathname === item.path ? '#6366f1' : '#64748b',
                                             fontWeight: pathname === item.path ? 600 : 500,
                                             textTransform: 'none',
-                                            fontSize: { xs: '13px', sm: '14px', lg: '15px' },
-                                            px: { xs: 1.5, sm: 2, lg: 3 },
-                                            py: 1,
-                                            borderRadius: '8px',
-                                            position: 'relative',
-                                            transition: 'all 0.3s ease',
+                                            fontSize: { md: '12px', lg: '13px', xl: '14px' },
+                                            px: { md: 0.75, lg: 1, xl: 1.25 },
+                                            py: { md: 0.5, lg: 0.75 },
                                             whiteSpace: 'nowrap',
-                                            '&::before': pathname === item.path ? {
-                                                content: '""',
-                                                position: 'absolute',
-                                                bottom: 0,
-                                                left: '50%',
-                                                transform: 'translateX(-50%)',
-                                                width: '60%',
-                                                height: '3px',
-                                                backgroundColor: '#6366f1',
-                                                borderRadius: '2px',
-                                            } : {},
+                                            minWidth: 'auto',
+                                            transition: 'all 0.2s ease',
                                             '&:hover': {
                                                 backgroundColor: pathname === item.path ? 'rgba(99, 102, 241, 0.1)' : 'rgba(100, 116, 139, 0.08)',
                                                 color: pathname === item.path ? '#6366f1' : '#475569',
@@ -164,8 +206,11 @@ function Navbar() {
                     )}
                 </Toolbar>
             </AppBar>
+            
+            {/* Mobile Drawer */}
             <Drawer
                 variant="temporary"
+                anchor="right"
                 open={mobileOpen}
                 onClose={handleDrawerToggle}
                 ModalProps={{
@@ -175,7 +220,7 @@ function Navbar() {
                     display: { xs: 'block', md: 'none' },
                     '& .MuiDrawer-paper': {
                         boxSizing: 'border-box',
-                        width: 280,
+                        width: { xs: 280, sm: 320 },
                     },
                 }}
             >
